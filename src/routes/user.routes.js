@@ -17,5 +17,7 @@ router.get('/advert/change-status', errorWrapper(auth), errorWrapper(pageControl
 router.get('/advert/list', errorWrapper(pageController.getListAdvert));
 router.get('/advert/:id', errorWrapper(pageController.getSingleAdvert));
 router.post('/advert/update/:advertId', errorWrapper(auth), errorWrapper(pageController.updateAdvert));
-router.get('/category/:id', errorWrapper(pageController.getCategory));
+
+router.get('/category-single/:id', errorWrapper(pageController.getCategory));
+
 module.exports = router;

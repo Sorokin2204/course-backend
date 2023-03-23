@@ -81,7 +81,7 @@ class PageController {
     const findExistAdvert = await Advert.findOne({
       where: {
         id: advertId,
-        userId: res.locals.userData?.id,
+        ...(res.locals.userData?.role != 'admin' && { userId: res.locals.userData?.id }),
       },
     });
     if (findExistAdvert) {
@@ -218,6 +218,7 @@ class PageController {
     const { id } = req.params;
     const findCategory = await Category.findOne({
       where: {
+        active: true,
         id,
       },
     });
@@ -233,7 +234,7 @@ class PageController {
     const advertList = await Advert.findAndCountAll({
       where: {
         status,
-        userId: res.locals.userData?.id,
+        ...(res.locals.userData?.role != 'admin' && { userId: res.locals.userData?.id }),
       },
       include: [
         {
