@@ -29,10 +29,7 @@ db.sequelize = sequelize;
 
 //MODELS
 db.user = require('./user.model')(sequelize, Sequelize);
-db.advert = require('./advert.model')(sequelize, Sequelize);
-db.category = require('./category.model')(sequelize, Sequelize);
 db.image = require('./image.model')(sequelize, Sequelize);
-// db.advertImage = require('./advertImage.model')(sequelize, Sequelize);
 
 setupRelationship(db);
 

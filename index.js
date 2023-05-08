@@ -4,7 +4,6 @@ const app = express();
 const db = require('./src/models');
 const bodyParser = require('body-parser');
 const userRouter = require('./src/routes/user.routes');
-const categoryRouter = require('./src/routes/category.routes');
 
 const reset = require('./src/setup');
 const { handleError } = require('./src/middleware/customError');
@@ -32,8 +31,7 @@ db.sequelize.sync({ alter: true }).then((se) => {
   reset(db);
 });
 
-app.use('/api', userRouter);
-app.use('/api', categoryRouter);
+app.use('/api/user', userRouter);
 
 app.use(function (req, res, next) {
   throw new CustomError(404, TypeError.PATH_NOT_FOUND);

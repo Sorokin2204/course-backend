@@ -30,15 +30,18 @@ class PageController {
     }
   }
   async update(req, res) {
-    const { name, surname, email, phone, isDeleteAvatar } = req.body;
+    const { name, surname, email, phone, isDeleteAvatar, company, profession, about, gender } = req.body;
     let newAvatar = req.files?.avatar;
-    console.log(res.locals.userData);
     let updateData = {
       name,
       surname,
       email,
       phone,
-      ...(isDeleteAvatar && { avatar: null }),
+      ...(isDeleteAvatar === 'true' && { avatar: null }),
+      ...(company && { company }),
+      ...(profession && { profession }),
+      ...(about && { about }),
+      ...(gender && { gender }),
     };
 
     if (newAvatar) {
@@ -55,204 +58,6 @@ class PageController {
     res.json(true);
   }
 
-  async createAdvert(req, res) {
-    const { images, category, desc, price, title } = req.body;
-    const createAdvert = await Advert.create({
-      userId: res.locals.userData?.id,
-      title,
-      price: parseInt(price.replace(/\D/g, '')),
-      status: 'publish',
-      desc,
-      categoryId: category,
-    });
-    let imagesData = [];
-    let countImg = 0;
-    for (let img of images) {
-      if (!img?.isDeleted) {
-        imagesData.push({ path: img.file, order: countImg, isMain: countImg == 0, advertId: createAdvert?.id });
-        countImg++;
-      }
-    }
-    await Image.bulkCreate(imagesData);
-    res.json(true);
-  }
-  async changeStatus(req, res) {
-    const { advertId, status } = req.query;
-    const findExistAdvert = await Advert.findOne({
-      where: {
-        id: advertId,
-        ...(res.locals.userData?.role != 'admin' && { userId: res.locals.userData?.id }),
-      },
-    });
-    if (findExistAdvert) {
-      await Advert.update(
-        { status },
-        {
-          where: {
-            id: advertId,
-            userId: res.locals.userData?.id,
-          },
-        },
-      );
-    }
-    res.json(true);
-  }
-  async updateAdvert(req, res) {
-    const { images, category, desc, price, title } = req.body;
-    const { advertId } = req.params;
-    const findAdvert = await Advert.findOne({
-      where: {
-        id: advertId,
-        status: 'publish',
-        userId: res.locals.userData?.id,
-      },
-    });
-    if (!findAdvert) {
-      throw new CustomError();
-    }
-    await Advert.update(
-      {
-        title,
-        price: parseInt(price.toString().replace(/\D/g, '')),
-
-        desc,
-        categoryId: category,
-      },
-      {
-        where: {
-          id: advertId,
-        },
-      },
-    );
-
-    let countImg = 0;
-    for (let img of images) {
-      if (img?.isDeleted) {
-        await Image.destroy({ where: { id: img?.innerId, advertId } });
-      } else if (img?.isNew) {
-        await Image.create({ path: img.file, order: countImg, isMain: countImg == 0, advertId: advertId });
-        countImg++;
-      } else if (img?.innerId) {
-        await Image.update({ order: countImg, isMain: countImg == 0 }, { where: { id: img?.innerId } });
-        countImg++;
-      }
-    }
-
-    res.json(true);
-  }
-  async getListAdvert(req, res) {
-    const { sort = 'by-date', page = 1, category } = req.query;
-    const offset = (page - 1) * 9;
-    let sortCond;
-    if (sort == 'by-date') {
-      sortCond = [['createAt', 'DESC']];
-    } else if (sort == 'by-chip') {
-      sortCond = [['price', 'ASC']];
-    } else if (sort == 'by-rich') {
-      sortCond = [['price', 'DESC']];
-    }
-    const advertList = await Advert.findAndCountAll({
-      where: {
-        status: 'publish',
-      },
-      ...(sortCond && {
-        order: sortCond,
-      }),
-      include: [
-        {
-          model: Category,
-          where: {
-            ...(category && {
-              id: category,
-            }),
-          },
-        },
-        {
-          model: Image,
-          where: {
-            order: 0,
-          },
-          required: false,
-        },
-        {
-          model: User,
-        },
-      ],
-      offset,
-      limit: 9,
-    });
-    res.json(advertList);
-  }
-
-  async getSingleAdvert(req, res) {
-    const { id } = req.params;
-    const advertSingle = await Advert.findOne({
-      where: {
-        status: 'publish',
-        id,
-      },
-      order: [[Image, 'order', 'asc']],
-      include: [
-        {
-          model: Category,
-        },
-        {
-          model: Image,
-          // order: [['order', 'ASC']],
-
-          required: false,
-        },
-        {
-          model: User,
-
-          required: false,
-        },
-      ],
-    });
-
-    const publishCount = await Advert.count({ where: { userId: advertSingle?.user?.id, status: 'publish' } });
-
-    res.json({ ...advertSingle.toJSON(), countAdvert: publishCount });
-  }
-  async getCategory(req, res) {
-    const { id } = req.params;
-    const findCategory = await Category.findOne({
-      where: {
-        active: true,
-        id,
-      },
-    });
-    if (findCategory) {
-      res.json(findCategory);
-    } else {
-      throw new CustomError();
-    }
-  }
-  async getAdvertUser(req, res) {
-    const { page = 1, status = 'publish' } = req.query;
-    const offset = (page - 1) * 9;
-    const advertList = await Advert.findAndCountAll({
-      where: {
-        status,
-        ...(res.locals.userData?.role != 'admin' && { userId: res.locals.userData?.id }),
-      },
-      include: [
-        {
-          model: Category,
-        },
-        {
-          model: Image,
-          where: {
-            order: 0,
-          },
-          required: false,
-        },
-      ],
-      offset,
-      limit: 9,
-    });
-    res.json(advertList);
-  }
   async auth(req, res) {
     const authHeader = req.headers['auth-token'];
     if (!authHeader) {
@@ -265,14 +70,11 @@ class PageController {
       return tokenData;
     });
     const findUser = await User.findOne({ where: { id: tokenData.id } });
-    const publishCount = await Advert.count({ where: { userId: tokenData.id, status: 'publish' } });
-    const disableCount = await Advert.count({ where: { userId: tokenData.id, status: 'disabled' } });
-    const canceledCount = await Advert.count({ where: { userId: tokenData.id, status: 'canceled' } });
-    const soldCount = await Advert.count({ where: { userId: tokenData.id, status: 'sold' } });
-    res.json({ ...findUser.toJSON(), publishCount, disableCount, canceledCount, soldCount });
+
+    res.json({ ...findUser.toJSON() });
   }
   async login(req, res) {
-    const { email, password } = req.body;
+    const { emailLogin: email, passwordLogin: password } = req.body;
 
     const findUser = await User.findOne({ where: { email } });
     if (!findUser) {
@@ -291,7 +93,7 @@ class PageController {
     const { email, password, name, surname, phone } = req.body;
     const passHash = await bcrypt.hash(password, 3);
     const findUserEmail = await User.findOne({ where: { email } });
-    console.log(req.body);
+
     if (findUserEmail) {
       throw new CustomError(400, TypeError.USER_EXIST);
     }
@@ -306,29 +108,6 @@ class PageController {
 
     const token = jwt.sign({ id: newUser.id, email: newUser.email }, process.env.SECRET_TOKEN, { expiresIn: '1h' });
     res.json({ token: token });
-  }
-  async searchAdvert(req, res) {
-    const { term } = req.query;
-
-    const findAdverts = await Advert.findAndCountAll({
-      where: {
-        status: 'publish',
-        title: { [Op.like]: `%${term}%` },
-      },
-      include: [
-        {
-          model: Category,
-        },
-        {
-          model: Image,
-          where: {
-            order: 0,
-          },
-          required: false,
-        },
-      ],
-    });
-    res.json(findAdverts);
   }
 }
 function getFileExt(name) {

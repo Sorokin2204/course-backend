@@ -29,6 +29,22 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
+    company: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    profession: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    about: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    gender: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
   });
   return User;
 };

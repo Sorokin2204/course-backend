@@ -4,10 +4,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    isMain: {
-      type: Sequelize.BOOLEAN,
-      allowNull: false,
-    },
+
     order: {
       type: Sequelize.INTEGER,
       allowNull: false,
