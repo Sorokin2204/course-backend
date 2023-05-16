@@ -29,7 +29,12 @@ db.sequelize = sequelize;
 
 //MODELS
 db.user = require('./user.model')(sequelize, Sequelize);
+db.result = require('./result.model')(sequelize, Sequelize);
 db.image = require('./image.model')(sequelize, Sequelize);
+db.nameBusiness = require('./nameBusiness.model')(sequelize, Sequelize);
+db.typeOfSale = require('./typeOfSale.model')(sequelize, Sequelize);
+db.whereSale = require('./whereSale.model')(sequelize, Sequelize);
+db.typeBusiness = require('./typeBusiness.model')(sequelize, Sequelize);
 
 setupRelationship(db);
 
