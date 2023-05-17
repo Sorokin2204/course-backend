@@ -8,6 +8,7 @@ const nameBusinessRouter = require('./src/routes/nameBusiness.routes');
 const typeBusinessRouter = require('./src/routes/typeBusiness.routes');
 const typeOfSaleRouter = require('./src/routes/typeOfSale.routes');
 const whereSaleRouter = require('./src/routes/whereSale.routes');
+const resultRouter = require('./src/routes/result.routes');
 
 const reset = require('./src/setup');
 const { handleError } = require('./src/middleware/customError');
@@ -40,6 +41,7 @@ app.use('/api', nameBusinessRouter);
 app.use('/api', typeBusinessRouter);
 app.use('/api', typeOfSaleRouter);
 app.use('/api', whereSaleRouter);
+app.use('/api', resultRouter);
 
 app.use(function (req, res, next) {
   throw new CustomError(404, TypeError.PATH_NOT_FOUND);
