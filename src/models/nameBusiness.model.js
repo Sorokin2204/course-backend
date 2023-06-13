@@ -4,6 +4,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
+    active: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true,
+    },
   });
   return NameBusiness;
 };

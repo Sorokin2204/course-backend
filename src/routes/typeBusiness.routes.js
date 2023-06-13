@@ -7,5 +7,6 @@ const { errorWrapper } = require('../middleware/customError');
 const typeBusinessController = require('../controller/typeBusiness.controller');
 
 router.get('/type-business', errorWrapper(typeBusinessController.getTypeBusinessList));
+router.post('/type-business', errorWrapper(typeBusinessController.upsertTypeBusinessList));
 
 module.exports = router;
