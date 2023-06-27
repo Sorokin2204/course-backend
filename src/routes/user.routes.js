@@ -11,5 +11,7 @@ router.post('/file/upload', errorWrapper(pageController.uploadFile));
 router.post('/login', errorWrapper(pageController.login));
 router.post('/register', errorWrapper(pageController.createUser));
 router.get('/auth', errorWrapper(pageController.auth));
+router.get('/list', errorWrapper(pageController.getUserList));
+router.get('/active-course', errorWrapper(pageController.swtichAccessCourse));
 
 module.exports = router;

@@ -89,6 +89,31 @@ class PageController {
     const token = jwt.sign({ id: findUser.id, email: findUser.email }, process.env.SECRET_TOKEN, { expiresIn: '24h' });
     res.json({ token: token });
   }
+  async swtichAccessCourse(req, res) {
+    const { id } = req.query;
+    const findUser = await User.findOne({
+      where: {
+        id,
+      },
+    });
+    if (!findUser) {
+    }
+    await User.update(
+      { activeCourse: !findUser?.activeCourse },
+      {
+        where: {
+          id,
+        },
+      },
+    );
+    res.json(true);
+  }
+  async getUserList(req, res) {
+    const data = await User.findAll({
+      attributes: ['name', 'surname', 'id', 'activeCourse'],
+    });
+    res.json(data);
+  }
   async createUser(req, res) {
     const { email, password, name, surname, phone } = req.body;
     const passHash = await bcrypt.hash(password, 3);
